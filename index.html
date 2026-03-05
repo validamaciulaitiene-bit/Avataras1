@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avataro kūrimo procesas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-elevated: #1a1a26;
+      --accent: #7c3aed;
+      --accent-glow: rgba(124, 58, 237, 0.4);
+      --accent-secondary: #06b6d4;
+      --text: #e4e4e7;
+      --text-muted: #71717a;
+      --border: #27272a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-gradient-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 20s ease-in-out infinite;
+    }
+    .bg-gradient-orb.orb-1 { top: -200px; left: -200px; background: var(--accent); }
+    .bg-gradient-orb.orb-2 { bottom: -200px; right: -200px; background: var(--accent-secondary); animation-delay: -10s; }
+
+    @keyframes floatOrb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(50px, 50px) scale(1.1); }
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      transform: translateY(-100%);
+      animation: slideDown 0.8s ease forwards;
+    }
+
+    @keyframes slideDown {
+      to { transform: translateY(0); }
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: var(--accent);
+    }
+
+    /* Sections */
+    section {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .section-subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.2s forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hero */
+    #hero {
+      text-align: center;
+    }
+
+    #hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    #hero .highlight {
+      color: var(--accent);
+      text-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    #hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.3s forwards;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.6s forwards;
+    }
+
+    .scroll-hint .chevron {
+      width: 24px;
+      height: 24px;
+      border-right: 2px solid var(--accent);
+      border-bottom: 2px solid var(--accent);
+      transform: rotate(45deg);
+      animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50% { transform: rotate(45deg) translateY(8px); }
+    }
+
+    /* Process steps */
+    .process-steps {
+      display: grid;
+      gap: 1.5rem;
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    .process-step {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .process-step.visible {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    .process-step:nth-child(1) { animation-delay: 0.1s; }
+    .process-step:nth-child(2) { animation-delay: 0.25s; }
+    .process-step:nth-child(3) { animation-delay: 0.4s; }
+    .process-step:nth-child(4) { animation-delay: 0.55s; }
+
+    .process-step:hover {
+      transform: translateX(8px);
+      box-shadow: 0 0 30px var(--accent-glow);
+      border-color: var(--accent);
+    }
+
+    @keyframes slideInLeft {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .step-num {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent), #5b21b6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .step-content h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-content p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Audio player section */
+    #audio-section .player-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 560px;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: box-shadow 0.3s;
+    }
+
+    #audio-section .player-card.visible {
+      animation: scaleIn 0.6s ease forwards;
+    }
+
+    #audio-section .player-card:hover {
+      box-shadow: 0 0 50px var(--accent-glow);
+    }
+
+    #audio-section .player-card.playing .player-icon {
+      animation: pulse 0.8s ease infinite;
+    }
+
+    #audio-section .player-card.playing .progress-bar {
+      animation: progressGlow 1.5s ease infinite;
+    }
+
+    @keyframes progressGlow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+
+    @keyframes scaleIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .player-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), #5b21b6);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.05); }
+    }
+
+    .player-header h3 {
+      font-size: 1.35rem;
+    }
+
+    .player-header span {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .progress-container {
+      height: 8px;
+      background: var(--bg-elevated);
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .btn-play {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--accent), #5b21b6);
+      font-size: 1.5rem;
+    }
+
+    .btn-play:hover {
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    /* Video section */
+    #video-section .video-wrapper {
+      width: 100%;
+      max-width: 800px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      opacity: 0;
+      transform: translateY(30px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    #video-section .video-wrapper.visible {
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    #video-section .video-wrapper:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      background: var(--bg-elevated);
+    }
+
+    .video-container iframe,
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    .video-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+      color: var(--text-muted);
+    }
+
+    .video-placeholder .icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.6;
+    }
+
+    .video-placeholder p {
+      font-size: 1rem;
+    }
+
+    .video-container.video-loaded .video-placeholder {
+      display: none;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav ul { gap: 1rem; font-size: 0.9rem; }
+      .process-step { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-gradient-orb orb-1"></div>
+  <div class="bg-gradient-orb orb-2"></div>
+
+  <nav>
+    <ul>
+      <li><a href="#hero">Pradžia</a></li>
+      <li><a href="#process">Procesas</a></li>
+      <li><a href="#audio-section">Audio</a></li>
+      <li><a href="#video-section">Video</a></li>
+    </ul>
+  </nav>
+
+  <section id="hero">
+    <h1>Išmoktas <span class="highlight">avataro</span> kūrimo procesas</h1>
+    <p>Interaktyvi pristatymo svetainė su žingsniais, garso įrašu ir galutiniu rezultatu.</p>
+    <div class="scroll-hint">
+      <span>Slink žemyn</span>
+      <div class="chevron"></div>
+    </div>
+  </section>
+
+  <section id="process">
+    <h2 class="section-title">Proceso žingsniai</h2>
+    <p class="section-subtitle">Kaip buvo kuriamas avataras – nuo idėjos iki rezultato</p>
+    <div class="process-steps">
+      <div class="process-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Koncepcija ir dizainas</h3>
+          <p>Apibrėžiama avataro paskirtis, stilius ir vizualinė kalba.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Modeliavimas ir tekstūros</h3>
+          <p>Kuriamas 3D modelis arba vektorinė grafika, pritaikomos tekstūros.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Animacija ir interakcija</h3>
+          <p>Pridedamos animacijos, mimika ir interaktyvūs elementai.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Eksportavimas ir integracija</h3>
+          <p>Galutinis rezultatas eksportuojamas ir integruojamas į projektą.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="audio-section">
+    <h2 class="section-title">Audio grotuvas</h2>
+    <p class="section-subtitle">Proceso aprašymas garsu – klausyk žingsnių paaiškinimo</p>
+    <div class="player-card">
+      <div class="player-header">
+        <div class="player-icon">🎙️</div>
+        <div>
+          <h3>Procesas</h3>
+          <span>Avataro kūrimo gidas</span>
+        </div>
+      </div>
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="time-display">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+      <div class="controls">
+        <button class="btn" id="btnPrev" title="Atgal 10s">⏪</button>
+        <button class="btn btn-play" id="btnPlay" title="Leisti / Pause">▶</button>
+        <button class="btn" id="btnNext" title="Pirmyn 10s">⏩</button>
+      </div>
+      <audio id="audio" preload="metadata">
+        <source src="media/process.mp3" type="audio/mpeg">
+        <source src="media/process.wav" type="audio/wav">
+        Jūsų naršyklė nepalaiko audio elemento.
+      </audio>
+    </div>
+  </section>
+
+  <section id="video-section">
+    <h2 class="section-title">Video</h2>
+    <p class="section-subtitle">Galutinis rezultatas – avataras veiksmėje</p>
+    <div class="video-wrapper">
+      <div class="video-container">
+        <video id="resultVideo" src="media/rezultatas.mp4" controls playsinline>
+          Jūsų naršyklė nepalaiko video atkūrimo.
+        </video>
+        <div class="video-placeholder" id="videoPlaceholder">
+          <span class="icon">🎬</span>
+          <p>Įdėkite failą <strong>media/rezultatas.mp4</strong> — tada čia pasirodys video.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Avataro kūrimo procesas — interaktyvi pristatymo svetainė</p>
+  </footer>
+
+  <script>
+    // Intersection Observer – animacijos atsiranda scrollinant
+    const observerOptions = { threshold: 0.2, rootMargin: '0px 0px -80px 0px' };
+
+    const stepObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          entry.target.querySelectorAll('.process-step').forEach(el => el.classList.add('visible'));
+        }
+      });
+    }, observerOptions);
+
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('#process').forEach(el => stepObserver.observe(el));
+    document.querySelectorAll('.player-card').forEach(el => cardObserver.observe(el));
+    document.querySelectorAll('.video-wrapper').forEach(el => cardObserver.observe(el));
+
+    // Audio grotuvas
+    const audio = document.getElementById('audio');
+    const btnPlay = document.getElementById('btnPlay');
+    const progressBar = document.getElementById('progressBar');
+    const progressContainer = document.getElementById('progressContainer');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+
+    function formatTime(seconds) {
+      if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateProgress() {
+      const percent = (audio.currentTime / audio.duration) * 100;
+      progressBar.style.width = percent + '%';
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+    }
+
+    function updateDuration() {
+      durationEl.textContent = formatTime(audio.duration);
+    }
+
+    btnPlay.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play().catch(() => {});
+        btnPlay.textContent = '⏸';
+      } else {
+        audio.pause();
+        btnPlay.textContent = '▶';
+      }
+    });
+
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('ended', () => {
+      btnPlay.textContent = '▶';
+      progressBar.style.width = '0%';
+      currentTimeEl.textContent = '0:00';
+      document.querySelector('.player-card').classList.remove('playing');
+    });
+
+    audio.addEventListener('play', () => document.querySelector('.player-card').classList.add('playing'));
+    audio.addEventListener('pause', () => document.querySelector('.player-card').classList.remove('playing'));
+
+    progressContainer.addEventListener('click', (e) => {
+      if (!audio.duration) return;
+      const rect = progressContainer.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = percent * audio.duration;
+    });
+
+    btnPrev.addEventListener('click', () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 10);
+    });
+
+    btnNext.addEventListener('click', () => {
+      audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+    });
+
+    // Jei nėra audio failo – rodoma trukmė 0:00
+    if (audio.readyState < 1) {
+      audio.addEventListener('loadedmetadata', updateDuration);
+    }
+
+    // Slėpti video placeholder, kai video failas įkeltas
+    const resultVideo = document.getElementById('resultVideo');
+    const videoContainer = resultVideo.closest('.video-container');
+    resultVideo.addEventListener('canplay', () => videoContainer.classList.add('video-loaded'));
+    resultVideo.addEventListener('error', () => videoContainer.classList.remove('video-loaded'));
+  </script>
+</body>
+</html>
